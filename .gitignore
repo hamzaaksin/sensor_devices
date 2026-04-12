@@ -1,0 +1,51 @@
+# STM32CubeIDE
+.cproject
+.project
+.settings/
+Debug/
+Release/
+*.o
+*.a
+*.so
+*.elf
+*.hex
+*.bin
+*.map
+
+# Build artifacts
+build/
+obj/
+lst/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IAR tools
+EWARM/
+*.ewp
+*.eww
+*.ewd
+
+# Keil tools
+*.uvoptx
+*.uvprojx
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+
+# Misc
+*.log
+.env
