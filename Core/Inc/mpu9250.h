@@ -6,9 +6,8 @@
 #define TheMemAdd 0x3B
 #define MEDIAN_WINDOW 5
 
-#include "stm32f4xx_hal.h" // Kullandığın işlemciye göre değişebilir
+#include "stm32f4xx_hal.h" 
 
-// Fonksiyon prototipini buraya ekle:
 int data_parsing(uint8_t *data, float *accel_data, float *gyro_data);
 
 #endif

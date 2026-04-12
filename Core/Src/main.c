@@ -121,7 +121,6 @@ int main(void) {
 
 	uint8_t wake_up_data = 0x00;
 
-	// Senin tanimladigin MPU6050_ADDR (0xD0) ve PWR_MGMT_1 (0x6B) kullaniyoruz
 	if (HAL_I2C_Mem_Write(&hi2c1, MPU6050_ADDR, PWR_MGMT_1, 1, &wake_up_data, 1,
 			100) != HAL_OK) {
 
@@ -135,22 +134,18 @@ int main(void) {
 	/* USER CODE BEGIN WHILE */
 	while (1) {
 		if (timer_1hz_flag == 1) {
-			timer_1hz_flag = 0; // Bayrağı hemen indir
+			timer_1hz_flag = 0; 
 
-			// Terminalde karışmaması için bir başlık atalım
 			HAL_UART_Transmit(&huart5,
 					(uint8_t*) "\r\n--- [1Hz SENSOR REPORT] ---\r\n", 31, 100);
 
-			// 1. İVME ÖLÇER (Accelerometer) İSTATİSTİKLERİ
 			Send_Sensor_Stats(&buf_ax, "ACC X");
 			Send_Sensor_Stats(&buf_ay, "ACC Y");
 			Send_Sensor_Stats(&buf_az, "ACC Z");
 
-			// Görsel ayırıcı
 			HAL_UART_Transmit(&huart5,
 					(uint8_t*) "----------------------------\r\n", 30, 100);
 
-			// 2. JİROSKOP (Gyroscope) İSTATİSTİKLERİ
 			Send_Sensor_Stats(&buf_gx, "GYRO X");
 			Send_Sensor_Stats(&buf_gy, "GYRO Y");
 			Send_Sensor_Stats(&buf_gz, "GYRO Z");
@@ -366,7 +361,6 @@ void HAL_I2C_MemRxCpltCallback(I2C_HandleTypeDef *hi2c) {
 		buffer_add_value(&buf_ay, filter_that(accel_data[1], &f_ay));
 		buffer_add_value(&buf_az, filter_that(accel_data[2], &f_az));
 
-		// 3. JİROSKOP (Gyroscope) - Filtrele ve İstatistik Tamponuna Ekle
 		buffer_add_value(&buf_gx, filter_that(gyro_data[0], &f_gx));
 		buffer_add_value(&buf_gy, filter_that(gyro_data[1], &f_gy));
 		buffer_add_value(&buf_gz, filter_that(gyro_data[2], &f_gz));
@@ -380,15 +374,12 @@ void HAL_I2C_MemRxCpltCallback(I2C_HandleTypeDef *hi2c) {
 	}
 }
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) {
-	// Birden fazla timer kullanırsan karışmasın diye kontrol ediyoruz
 	if (htim->Instance == TIM1) {
-		timer_1hz_flag = 1; // Sadece bayrağı kaldır ve hemen çık!
+		timer_1hz_flag = 1;
 	}
 }
 void Send_Sensor_Stats(struct buf_handle_t *p_handle, char *label) {
-	// 1. Güvenlik Kontrolü: Buffer boşsa veya tek veri varsa hesaplama yapma
 	if (p_handle->count < 2) {
-		// UART5 üzerinden veri yok uyarısı gönderebilirsin (isteğe bağlı)
 		return;
 	}
 
@@ -397,7 +388,6 @@ void Send_Sensor_Stats(struct buf_handle_t *p_handle, char *label) {
 	float sum = 0.0f;
 	float temp_sort[CIRC_BUF_SIZE];
 
-	// 2. Max, Min ve Ortalama için toplam hesabı
 	for (uint16_t i = 0; i < p_handle->count; i++) {
 		float val = p_handle->buffer[i];
 		if (val < min)
@@ -405,18 +395,16 @@ void Send_Sensor_Stats(struct buf_handle_t *p_handle, char *label) {
 		if (val > max)
 			max = val;
 		sum += val;
-		temp_sort[i] = val; // Medyan sıralaması için veriyi kopyalıyoruz
+		temp_sort[i] = val; 
 	}
 	float mean = sum / p_handle->count;
 
-	// 3. Standart Sapma (Standard Deviation) Hesabı
 	float sum_sq_diff = 0.0f;
 	for (uint16_t i = 0; i < p_handle->count; i++) {
 		sum_sq_diff += pow(p_handle->buffer[i] - mean, 2);
 	}
 	float std_dev = sqrt(sum_sq_diff / p_handle->count);
 
-	// 4. Medyan (Median) Hesabı - Küçükten büyüğe sıralıyoruz
 	for (int i = 0; i < p_handle->count - 1; i++) {
 		for (int j = 0; j < p_handle->count - i - 1; j++) {
 			if (temp_sort[j] > temp_sort[j + 1]) {
@@ -428,9 +416,7 @@ void Send_Sensor_Stats(struct buf_handle_t *p_handle, char *label) {
 	}
 	float median = temp_sort[p_handle->count / 2];
 
-	// 5. UART5'ten Paketi Gönder
 	char msg[128];
-	// Not: printf float desteği (-u _printf_float) açık olmalı!
 	int len = sprintf(msg, "[%s] Max:%.2f Min:%.2f Med:%.2f StdDev:%.4f\r\n",
 			label, max, min, median, std_dev);
 

@@ -3,15 +3,15 @@
 
 #include <stdint.h>
 
-#define CIRC_BUF_SIZE 100 // İstatistik için saklanacak veri miktarı (İstediğin gibi değiştir)
+#define CIRC_BUF_SIZE 100 
 
 struct buf_handle_t {
-    float buffer[CIRC_BUF_SIZE]; // i. Statik olarak ayrılmış alan
-    uint16_t head;               // Yazılacak sıradaki yer
-    uint16_t count;              // Buffer içindeki güncel veri sayısı
+    float buffer[CIRC_BUF_SIZE]; 
+    uint16_t head;               
+    uint16_t count;              
 };
 
-// Fonksiyon Prototipleri
+
 void buffer_add_value(struct buf_handle_t *p_handle, float val);
 int buffer_get_value(struct buf_handle_t *p_handle, float *p_sensor_data);
 
